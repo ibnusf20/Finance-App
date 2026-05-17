@@ -1,7 +1,8 @@
 # Finance-App
 # 💰 Simple Personal Finance App
 
-<img width="1365" height="608" alt="image" src="https://github.com/user-attachments/assets/4efc8ee8-67e1-42f6-a1c9-b00bdcf815ca" />
+<img width="1365" height="606" alt="image" src="https://github.com/user-attachments/assets/41811054-9cc0-45ba-83c0-99fa55d57d56" />
+
 
 Aplikasi web manajemen keuangan personal berbasis **Go (Golang)** yang dirancang untuk mencatat pemasukan dan pengeluaran secara mandiri. Aplikasi ini dilengkapi dengan visualisasi tren arus kas bulanan menggunakan grafik garis interaktif, serta ringkasan statistik harian dan bulanan.
 
