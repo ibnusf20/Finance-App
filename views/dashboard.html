@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard - Finance App</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        .card-stat { transition: transform 0.2s; }
+        .card-stat:hover { transform: translateY(-5px); }
+        @media (max-width: 991.98px) {
+            .navbar-collapse {
+                background: #0d6efd;
+                padding: 1rem;
+                border-radius: 8px;
+                margin-top: 10px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-light">
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4 shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/dashboard">Finance App</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMainContent">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navMainContent">
+                <!-- Menu Navigasi Halaman -->
+                <div class="navbar-nav me-auto">
+                    <a class="nav-link active" href="/dashboard">Ringkasan</a>
+                    <a class="nav-link" href="/dashboard/transaction/add">Tambah Transaksi</a>
+                    <a class="nav-link" href="/dashboard/history">Riwayat Log</a>
+                </div>
+                <!-- Info User & Logout -->
+                <div class="navbar-nav ms-auto align-items-center">
+                    <span class="nav-link text-white me-lg-3 mb-2 mb-lg-0">Halo, <strong>{{.Username}}</strong></span>
+                    <a href="/logout" class="btn btn-danger btn-sm px-3 w-100 w-lg-auto">Logout</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- BARIS 1: SALDO UTAMA -->
+        <div class="row g-3 mb-4">
+            <div class="col-12 col-md-4">
+                <div class="card text-white bg-primary shadow-sm h-100 border-0 card-stat">
+                    <div class="card-body text-center">
+                        <small class="text-white-50 d-block">Sisa Saldo Saat Ini</small>
+                        <h2 class="card-title mt-1 fw-bold">Rp {{rupiah .Balance}}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-4">
+                <div class="card text-white bg-success shadow-sm h-100 border-0 card-stat">
+                    <div class="card-body text-center">
+                        <small class="text-white-50 d-block">Total Pemasukan</small>
+                        <h4 class="card-title mt-1">Rp {{rupiah .TotalIncome}}</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-4">
+                <div class="card text-white bg-danger shadow-sm h-100 border-0 card-stat">
+                    <div class="card-body text-center">
+                        <small class="text-white-50 d-block">Total Pengeluaran</small>
+                        <h4 class="card-title mt-1">Rp {{rupiah .TotalExpense}}</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BARIS 2: STATISTIK & GRAFIK -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm mb-3">
+                    <div class="card-header bg-white fw-bold text-primary border-0">Statistik Hari Ini</div>
+                    <div class="card-body d-flex justify-content-between">
+                        <div><small class="text-muted d-block">Masuk</small><span class="text-success fw-bold">+ Rp {{rupiah .DayIncome}}</span></div>
+                        <div class="text-end"><small class="text-muted d-block">Keluar</small><span class="text-danger fw-bold">- Rp {{rupiah .DayExpense}}</span></div>
+                    </div>
+                </div>
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white fw-bold text-primary border-0">Statistik Bulan Ini</div>
+                    <div class="card-body d-flex justify-content-between">
+                        <div><small class="text-muted d-block">Masuk</small><span class="text-success fw-bold">+ Rp {{rupiah .MonthIncome}}</span></div>
+                        <div class="text-end"><small class="text-muted d-block">Keluar</small><span class="text-danger fw-bold">- Rp {{rupiah .MonthExpense}}</span></div>
+                    </div>
+                </div>
+            </div>
+            <!-- Grafik Bulanan -->
+            <div class="col-md-8">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white fw-bold text-primary border-0">Grafik Arus Kas Bulanan</div>
+                    <div class="card-body">
+                        <canvas id="monthlyChart" style="max-height: 200px;"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- JavaScripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        const ctx = document.getElementById('monthlyChart').getContext('2d');
+        
+        // Data di-inject dari Go template
+        const labels = [
+            {{range .MonthlyReports}} "{{.MonthName}} {{.Year}}", {{end}}
+        ];
+        const incomeData = [
+            {{range .MonthlyReports}} {{.Income}}, {{end}}
+        ];
+        const expenseData = [
+            {{range .MonthlyReports}} {{.Expense}}, {{end}}
+        ];
+
+        // Fallback jika data kosong
+        const finalLabels = labels.length > 0 ? labels : ["Belum Ada Data"];
+        const finalIncome = incomeData.length > 0 ? incomeData : [0];
+        const finalExpense = expenseData.length > 0 ? expenseData : [0];
+
+        new Chart(ctx, {
+            type: 'line', // <--- MENGUBAH JADI GRAFIK GARIS
+            data: {
+                labels: finalLabels,
+                datasets: [
+                    {
+                        label: 'Pemasukan',
+                        data: finalIncome,
+                        borderColor: '#198754',       // Warna garis hijau
+                        backgroundColor: 'rgba(25, 135, 84, 0.1)', // Warna bayangan transparan di bawah garis
+                        tension: 0.3,                 // Membuat garis melengkung halus (smooth curve)
+                        fill: true,                   // Mengisi warna di bawah garis
+                        borderWidth: 3
+                    },
+                    {
+                        label: 'Pengeluaran',
+                        data: finalExpense,
+                        borderColor: '#dc3545',       // Warna garis merah
+                        backgroundColor: 'rgba(220, 53, 69, 0.1)', // Warna bayangan transparan di bawah garis
+                        tension: 0.3,                 // Membuat garis melengkung halus
+                        fill: true,                   // Mengisi warna di bawah garis
+                        borderWidth: 3
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    }
+                },
+                scales: {
+                    y: { 
+                        beginAtZero: true 
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
