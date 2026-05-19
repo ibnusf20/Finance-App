@@ -12,6 +12,7 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
+	"github.com/xuri/excelize/v2"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -48,7 +49,7 @@ var DB *gorm.DB
 
 // --- KONEKSI DATABASE ---
 func connectDatabase() {
-	dsn := "link database anda"
+	dsn := "postgresql://postgres.jknwjhfwuhxgrnsciwks:lupapaswode@aws-1-ap-northeast-1.pooler.supabase.com:5432/postgres"
 	database, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		fmt.Println(err)
@@ -173,7 +174,6 @@ func main() {
 	dashboard.Use(AuthRequired())
 	{
 		// Halaman Utama Ringkasan (dashboard.html)
-		// Halaman Utama Ringkasan (dashboard.html)
 		dashboard.GET("/", func(c *gin.Context) {
 			session := sessions.Default(c)
 			userID := session.Get("user_id").(uint)
@@ -212,32 +212,28 @@ func main() {
 				}
 			}
 
-			// =================================================================
 			// LOGIKA BARU: Query Agregasi untuk Grafik Arus Kas Bulanan
-			// =================================================================
 			var reports []MonthlyReport
 
-			// Raw SQL Query untuk mengelompokkan income & expense berdasarkan bulan menggunakan GORM
+			// Gunakan alias dengan tanda kutip dua "" agar pas dengan field Struct Go
 			err := DB.Raw(`
-				SELECT 
-					TO_CHAR(date, 'TMMonth') as month_name,
-					EXTRACT(YEAR FROM date)::int as year,
-					COALESCE(SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END), 0)::bigint as income,
-					COALESCE(SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END), 0)::bigint as expense,
-					(COALESCE(SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END), 0) - COALESCE(SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END), 0))::bigint as net
-				FROM transactions
-				WHERE user_id = ?
-				GROUP BY EXTRACT(YEAR FROM date), EXTRACT(MONTH FROM date), TO_CHAR(date, 'TMMonth')
-				ORDER BY EXTRACT(YEAR FROM date) ASC, EXTRACT(MONTH FROM date) ASC
-				LIMIT 6
-			`, userID).Scan(&reports).Error
+    SELECT 
+        TO_CHAR(date, 'TMMonth') as "MonthName",
+        EXTRACT(YEAR FROM date)::int as "Year",
+        COALESCE(SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END), 0)::bigint as "Income",
+        COALESCE(SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END), 0)::bigint as "Expense",
+        (COALESCE(SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END), 0) - COALESCE(SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END), 0))::bigint as "Net"
+    FROM transactions
+    WHERE user_id = ?
+    GROUP BY EXTRACT(YEAR FROM date), EXTRACT(MONTH FROM date), TO_CHAR(date, 'TMMonth')
+    ORDER BY EXTRACT(YEAR FROM date) ASC, EXTRACT(MONTH FROM date) ASC
+    LIMIT 6
+`, userID).Scan(&reports).Error
 
 			if err != nil {
 				fmt.Println("Gagal mengambil data laporan bulanan:", err)
 			}
-			// =================================================================
 
-			// Mengirimkan data ke views/dashboard.html
 			c.HTML(http.StatusOK, "dashboard.html", gin.H{
 				"Username":       username,
 				"Balance":        totalIncome - totalExpense,
@@ -247,13 +243,11 @@ func main() {
 				"DayExpense":     dayExpense,
 				"MonthIncome":    monthIncome,
 				"MonthExpense":   monthExpense,
-				"MonthlyReports": reports, // <--- Sekarang data ini sudah dikirim ke Chart.js!
+				"MonthlyReports": reports,
 			})
 		})
 
-		// DI SINI TEMPAT MENEMPELKAN ROUTE BARU NYA:
-
-		// RUTE BARU 1: Menampilkan halaman form input (transaction_add.html)
+		// Menampilkan halaman form input (transaction_add.html)
 		dashboard.GET("/transaction/add", func(c *gin.Context) {
 			session := sessions.Default(c)
 			username := session.Get("username").(string)
@@ -263,7 +257,7 @@ func main() {
 			})
 		})
 
-		// RUTE BARU 2: Menampilkan halaman riwayat penuh (history.html)
+		// Menampilkan halaman riwayat penuh (history.html)
 		dashboard.GET("/history", func(c *gin.Context) {
 			session := sessions.Default(c)
 			userID := session.Get("user_id").(uint)
@@ -278,7 +272,7 @@ func main() {
 			})
 		})
 
-		// Rute Proses Submit Form (Tetap sama, diarahkan kembali ke halaman history setelah simpan)
+		// Rute Proses Submit Form
 		dashboard.POST("/transaction", func(c *gin.Context) {
 			session := sessions.Default(c)
 			userID := session.Get("user_id").(uint)
@@ -304,8 +298,184 @@ func main() {
 
 			DB.Create(&transaction)
 
-			// Setelah sukses simpan, langsung redirect ke halaman riwayat log
 			c.Redirect(http.StatusFound, "/dashboard/history")
+		})
+		// =================================================================
+		// RUTE BARU: EKSPOR DATA KE EXCEL
+		// =================================================================
+		dashboard.GET("/export/excel", func(c *gin.Context) {
+			session := sessions.Default(c)
+			userID := session.Get("user_id").(uint)
+			username := session.Get("username").(string)
+
+			// 1. Ambil data transaksi user dari database Postgres
+			var transactions []Transaction
+			if err := DB.Where("user_id = ?", userID).Order("date desc").Find(&transactions).Error; err != nil {
+				c.String(http.StatusInternalServerError, "Gagal mengambil data transaksi")
+				return
+			}
+
+			// 2. Buat file Excel baru menggunakan excelize
+			f := excelize.NewFile()
+			defer func() {
+				if err := f.Close(); err != nil {
+					fmt.Println(err)
+				}
+			}()
+
+			// Ubah nama sheet default menjadi "Laporan Keuangan"
+			sheetName := "Laporan Keuangan"
+			f.SetSheetName("Sheet1", sheetName)
+
+			// 3. Buat Style untuk Header (Warna Background Biru, Teks Putih & Tebal)
+			headerStyle, err := f.NewStyle(&excelize.Style{
+				Font:      &excelize.Font{Bold: true, Color: "FFFFFF"},
+				Fill:      excelize.Fill{Type: "pattern", Color: []string{"0D6EFD"}, Pattern: 1},
+				Alignment: &excelize.Alignment{Horizontal: "center", Vertical: "center"},
+			})
+			if err != nil {
+				fmt.Println(err)
+			}
+
+			// 4. Tulis Judul di Baris Atas
+			f.SetCellValue(sheetName, "A1", "LAPORAN KEUANGAN PERSONAL")
+			f.SetCellValue(sheetName, "A2", "Pengguna: "+username)
+			f.SetCellValue(sheetName, "A3", "Tanggal Ekspor: "+time.Now().Format("02-01-2006 15:04"))
+
+			// 5. Tulis Header Tabel di Baris ke-5
+			headers := []string{"No", "Tanggal", "Tipe", "Kategori", "Jumlah (Rp)", "Deskripsi"}
+			for i, header := range headers {
+				cell, _ := excelize.CoordinatesToCellName(i+1, 5)
+				f.SetCellValue(sheetName, cell, header)
+				f.SetCellStyle(sheetName, cell, cell, headerStyle)
+			}
+
+			// 6. Isi Data Transaksi ke Baris-Baris Selanjutnya
+			startRow := 6
+			for idx, t := range transactions {
+				currentRow := startRow + idx
+
+				// Terjemahkan tipe ke bahasa Indonesia agar rapi
+				tipeTransaksi := "Pemasukan"
+				if t.Type == "expense" {
+					tipeTransaksi = "Pengeluaran"
+				}
+
+				f.SetCellValue(sheetName, fmt.Sprintf("A%d", currentRow), idx+1)
+				f.SetCellValue(sheetName, fmt.Sprintf("B%d", currentRow), t.Date.Format("02-01-2006 15:04"))
+				f.SetCellValue(sheetName, fmt.Sprintf("C%d", currentRow), tipeTransaksi)
+				f.SetCellValue(sheetName, fmt.Sprintf("D%d", currentRow), t.Category)
+				f.SetCellValue(sheetName, fmt.Sprintf("E%d", currentRow), t.Amount) // Angka mentah agar bisa diformat di Excel
+				f.SetCellValue(sheetName, fmt.Sprintf("F%d", currentRow), t.Description)
+			}
+
+			// 7. Atur Lebar Kolom Secara Otomatis Agar Tidak Terpotong
+			f.SetColWidth(sheetName, "A", "A", 5)
+			f.SetColWidth(sheetName, "B", "B", 20)
+			f.SetColWidth(sheetName, "C", "C", 15)
+			f.SetColWidth(sheetName, "D", "D", 15)
+			f.SetColWidth(sheetName, "E", "E", 18)
+			f.SetColWidth(sheetName, "F", "F", 30)
+
+			// 8. Atur Header HTTP agar browser mengenali ini sebagai unduhan file Excel
+			filename := fmt.Sprintf("Laporan_Keuangan_%s_%s.xlsx", username, time.Now().Format("20060102"))
+
+			c.Header("Content-Disposition", "attachment; filename="+filename)
+			c.Header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+			c.Header("Content-Transfer-Encoding", "binary")
+			c.Header("Cache-Control", "no-cache")
+
+			// Write data langsung ke response body Gin (Stream ke Browser)
+			if err := f.Write(c.Writer); err != nil {
+				c.String(http.StatusInternalServerError, "Gagal menulis file Excel")
+			}
+		})
+
+		// =================================================================
+		// DI SINI ADALAH PERUBAHAN TAMBAHAN ROUTE PENGATURAN (SETTINGS)
+		// =================================================================
+
+		// 1. Menampilkan Halaman Pengaturan Akun
+		dashboard.GET("/settings", func(c *gin.Context) {
+			session := sessions.Default(c)
+			userID := session.Get("user_id").(uint)
+
+			var user User
+			if err := DB.First(&user, userID).Error; err != nil {
+				c.Redirect(http.StatusFound, "/login")
+				return
+			}
+
+			c.HTML(http.StatusOK, "settings.html", gin.H{
+				"Username": user.Username,
+				"Email":    user.Email,
+			})
+		})
+
+		// 2. Memproses Update Informasi Akun & Password
+		dashboard.POST("/settings", func(c *gin.Context) {
+			session := sessions.Default(c)
+			userID := session.Get("user_id").(uint)
+
+			usernameInput := c.PostForm("username")
+			emailInput := c.PostForm("email")
+			oldPassword := c.PostForm("old_password")
+			newPassword := c.PostForm("new_password")
+
+			var user User
+			if err := DB.First(&user, userID).Error; err != nil {
+				c.Redirect(http.StatusFound, "/login")
+				return
+			}
+
+			// Validasi Password Lama wajib diisi jika berniat ganti password baru
+			if oldPassword != "" || newPassword != "" {
+				if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(oldPassword)); err != nil {
+					c.HTML(http.StatusBadRequest, "settings.html", gin.H{
+						"Username": user.Username,
+						"Email":    user.Email,
+						"Error":    "Password lama yang dimasukkan tidak sesuai!",
+					})
+					return
+				}
+
+				if len(newPassword) < 6 {
+					c.HTML(http.StatusBadRequest, "settings.html", gin.H{
+						"Username": user.Username,
+						"Email":    user.Email,
+						"Error":    "Password baru minimal harus 6 karakter!",
+					})
+					return
+				}
+
+				// Enkripsi password baru
+				hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.DefaultCost)
+				user.Password = string(hashedPassword)
+			}
+
+			// Update field profil utama
+			user.Username = usernameInput
+			user.Email = emailInput
+
+			// Simpan semua modifikasi ke database Postgres
+			if err := DB.Save(&user).Error; err != nil {
+				c.HTML(http.StatusBadRequest, "settings.html", gin.H{
+					"Username": user.Username,
+					"Email":    user.Email,
+					"Error":    "Username atau Email sudah terpakai oleh pengguna lain!",
+				})
+				return
+			}
+
+			// Update session agar nama di pojok navbar ikut berubah seketika
+			session.Set("username", user.Username)
+			session.Save()
+
+			c.HTML(http.StatusOK, "settings.html", gin.H{
+				"Username": user.Username,
+				"Email":    user.Email,
+				"Success":  "Informasi akun Anda telah berhasil diperbarui!",
+			})
 		})
 	}
 

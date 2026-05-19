@@ -2,169 +2,193 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Dashboard - Finance App</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Dompet Mandiri</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        .card-stat { transition: transform 0.2s; }
-        .card-stat:hover { transform: translateY(-5px); }
-        @media (max-width: 991.98px) {
-            .navbar-collapse {
-                background: #0d6efd;
-                padding: 1rem;
-                border-radius: 8px;
-                margin-top: 10px;
-            }
-        }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
     </style>
 </head>
-<body class="bg-light">
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col">
 
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4 shadow-sm">
-        <div class="container">
-            <a class="navbar-brand fw-bold" href="/dashboard">Finance App</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMainContent">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navMainContent">
-                <!-- Menu Navigasi Halaman -->
-                <div class="navbar-nav me-auto">
-                    <a class="nav-link active" href="/dashboard">Ringkasan</a>
-                    <a class="nav-link" href="/dashboard/transaction/add">Tambah Transaksi</a>
-                    <a class="nav-link" href="/dashboard/history">Riwayat Log</a>
+    <!-- Top Navigation Bar -->
+    <nav class="bg-white border-b border-slate-100 sticky top-0 z-40 shadow-sm shadow-slate-100/50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <!-- Brand Logo -->
+                <div class="flex items-center gap-2">
+                    <div class="bg-blue-600 p-2 rounded-xl text-white">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <span class="text-lg font-bold tracking-tight bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">DompetMandiri</span>
                 </div>
-                <!-- Info User & Logout -->
-                <div class="navbar-nav ms-auto align-items-center">
-                    <span class="nav-link text-white me-lg-3 mb-2 mb-lg-0">Halo, <strong>{{.Username}}</strong></span>
-                    <a href="/logout" class="btn btn-danger btn-sm px-3 w-100 w-lg-auto">Logout</a>
+
+                <!-- User Actions & Navigation Menu -->
+                <div class="flex items-center gap-2 sm:gap-4">
+                    <a href="/dashboard/transaction/add" class="bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-bold px-3 py-2 rounded-xl shadow-md shadow-blue-100 transition-all flex items-center gap-1">
+                        <span>+</span> Catat Transaksi
+                    </a>
+                    <a href="/dashboard/history" class="text-xs sm:text-sm font-semibold text-slate-600 hover:text-blue-600 px-2 py-2 transition-colors">
+                        Riwayat
+                    </a>
+                    <a href="/dashboard/settings" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs sm:text-sm font-semibold px-3 py-2 rounded-xl transition-all flex items-center gap-1">
+                        ⚙️ Profil
+                    </a>
+                    <a href="/logout" class="text-xs sm:text-sm font-bold text-rose-600 hover:text-rose-700 px-2 py-2 ml-1">
+                        Keluar
+                    </a>
                 </div>
             </div>
         </div>
     </nav>
 
-    <!-- Main Content -->
-    <div class="container">
-        <!-- BARIS 1: SALDO UTAMA -->
-        <div class="row g-3 mb-4">
-            <div class="col-12 col-md-4">
-                <div class="card text-white bg-primary shadow-sm h-100 border-0 card-stat">
-                    <div class="card-body text-center">
-                        <small class="text-white-50 d-block">Sisa Saldo Saat Ini</small>
-                        <h2 class="card-title mt-1 fw-bold">Rp {{rupiah .Balance}}</h2>
-                    </div>
-                </div>
-            </div>
-            <div class="col-6 col-md-4">
-                <div class="card text-white bg-success shadow-sm h-100 border-0 card-stat">
-                    <div class="card-body text-center">
-                        <small class="text-white-50 d-block">Total Pemasukan</small>
-                        <h4 class="card-title mt-1">Rp {{rupiah .TotalIncome}}</h4>
-                    </div>
-                </div>
-            </div>
-            <div class="col-6 col-md-4">
-                <div class="card text-white bg-danger shadow-sm h-100 border-0 card-stat">
-                    <div class="card-body text-center">
-                        <small class="text-white-50 d-block">Total Pengeluaran</small>
-                        <h4 class="card-title mt-1">Rp {{rupiah .TotalExpense}}</h4>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- BARIS 2: STATISTIK & GRAFIK -->
-        <div class="row g-3 mb-4">
-            <div class="col-md-4">
-                <div class="card border-0 shadow-sm mb-3">
-                    <div class="card-header bg-white fw-bold text-primary border-0">Statistik Hari Ini</div>
-                    <div class="card-body d-flex justify-content-between">
-                        <div><small class="text-muted d-block">Masuk</small><span class="text-success fw-bold">+ Rp {{rupiah .DayIncome}}</span></div>
-                        <div class="text-end"><small class="text-muted d-block">Keluar</small><span class="text-danger fw-bold">- Rp {{rupiah .DayExpense}}</span></div>
-                    </div>
-                </div>
-                <div class="card border-0 shadow-sm">
-                    <div class="card-header bg-white fw-bold text-primary border-0">Statistik Bulan Ini</div>
-                    <div class="card-body d-flex justify-content-between">
-                        <div><small class="text-muted d-block">Masuk</small><span class="text-success fw-bold">+ Rp {{rupiah .MonthIncome}}</span></div>
-                        <div class="text-end"><small class="text-muted d-block">Keluar</small><span class="text-danger fw-bold">- Rp {{rupiah .MonthExpense}}</span></div>
-                    </div>
-                </div>
-            </div>
-            <!-- Grafik Bulanan -->
-            <div class="col-md-8">
-                <div class="card border-0 shadow-sm h-100">
-                    <div class="card-header bg-white fw-bold text-primary border-0">Grafik Arus Kas Bulanan</div>
-                    <div class="card-body">
-                        <canvas id="monthlyChart" style="max-height: 200px;"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- JavaScripts -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    <script>
-        const ctx = document.getElementById('monthlyChart').getContext('2d');
+    <!-- Main Content Wrapper -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
-        // Data di-inject dari Go template
-        const labels = [
-            {{range .MonthlyReports}} "{{.MonthName}} {{.Year}}", {{end}}
-        ];
-        const incomeData = [
-            {{range .MonthlyReports}} {{.Income}}, {{end}}
-        ];
-        const expenseData = [
-            {{range .MonthlyReports}} {{.Expense}}, {{end}}
-        ];
+        <!-- Welcome Banner -->
+        <div class="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Halo, {{.Username}} 👋</h1>
+                <p class="text-slate-500 text-sm mt-1">Berikut adalah ringkasan performa finansial dan catatan kas Anda.</p>
+            </div>
+            <!-- Live Date Badge -->
+            <div class="self-start sm:self-center bg-white px-4 py-2 rounded-xl border border-slate-200/60 shadow-sm text-xs font-semibold text-slate-500 flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                Sistem Aktif
+            </div>
+        </div>
 
-        // Fallback jika data kosong
-        const finalLabels = labels.length > 0 ? labels : ["Belum Ada Data"];
-        const finalIncome = incomeData.length > 0 ? incomeData : [0];
-        const finalExpense = expenseData.length > 0 ? expenseData : [0];
+        <!-- Row 1: Top Highlight Cards (Sisa Saldo, Pemasukan, Pengeluaran) -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <!-- Card 1: Sisa Saldo (Gradasi Premium) -->
+            <div class="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-3xl p-6 text-white shadow-xl shadow-blue-200/50 relative overflow-hidden">
+                <div class="absolute -right-8 -bottom-8 w-24 h-24 bg-white/10 rounded-full filter blur-xl"></div>
+                <p class="text-xs font-semibold text-blue-100 uppercase tracking-wider">Sisa Saldo (Net Balance)</p>
+                <h3 class="text-3xl font-extrabold mt-2 tracking-tight">Rp {{.Balance | rupiah}}</h3>
+                <div class="mt-4 pt-4 border-t border-white/10 flex justify-between items-center text-xs text-blue-100">
+                    <span>Akumulasi Keseluruhan</span>
+                    <span class="bg-white/20 px-2 py-0.5 rounded-md font-bold">Dompet</span>
+                </div>
+            </div>
 
-        new Chart(ctx, {
-            type: 'line', // <--- MENGUBAH JADI GRAFIK GARIS
-            data: {
-                labels: finalLabels,
-                datasets: [
-                    {
-                        label: 'Pemasukan',
-                        data: finalIncome,
-                        borderColor: '#198754',       // Warna garis hijau
-                        backgroundColor: 'rgba(25, 135, 84, 0.1)', // Warna bayangan transparan di bawah garis
-                        tension: 0.3,                 // Membuat garis melengkung halus (smooth curve)
-                        fill: true,                   // Mengisi warna di bawah garis
-                        borderWidth: 3
-                    },
-                    {
-                        label: 'Pengeluaran',
-                        data: finalExpense,
-                        borderColor: '#dc3545',       // Warna garis merah
-                        backgroundColor: 'rgba(220, 53, 69, 0.1)', // Warna bayangan transparan di bawah garis
-                        tension: 0.3,                 // Membuat garis melengkung halus
-                        fill: true,                   // Mengisi warna di bawah garis
-                        borderWidth: 3
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'top',
-                    }
-                },
-                scales: {
-                    y: { 
-                        beginAtZero: true 
-                    }
-                }
-            }
-        });
-    </script>
+            <!-- Card 2: Total Pemasukan -->
+            <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 flex flex-col justify-between">
+                <div>
+                    <div class="flex justify-between items-start">
+                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Pemasukan</p>
+                        <span class="bg-emerald-50 text-emerald-600 text-xs font-bold px-2.5 py-1 rounded-xl">Income</span>
+                    </div>
+                    <h3 class="text-2xl font-bold text-slate-900 mt-2 tracking-tight">Rp {{.TotalIncome | rupiah}}</h3>
+                </div>
+                <div class="mt-4 pt-3 border-t border-slate-50 text-xs text-slate-400 flex gap-4">
+                    <div>Hari ini: <span class="font-semibold text-emerald-600">Rp {{.DayIncome | rupiah}}</span></div>
+                    <div>Bulan ini: <span class="font-semibold text-emerald-600">Rp {{.MonthIncome | rupiah}}</span></div>
+                </div>
+            </div>
+
+            <!-- Card 3: Total Pengeluaran -->
+            <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 flex flex-col justify-between">
+                <div>
+                    <div class="flex justify-between items-start">
+                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Pengeluaran</p>
+                        <span class="bg-rose-50 text-rose-600 text-xs font-bold px-2.5 py-1 rounded-xl">Expense</span>
+                    </div>
+                    <h3 class="text-2xl font-bold text-slate-900 mt-2 tracking-tight">Rp {{.TotalExpense | rupiah}}</h3>
+                </div>
+                <div class="mt-4 pt-3 border-t border-slate-50 text-xs text-slate-400 flex gap-4">
+                    <div>Hari ini: <span class="font-semibold text-rose-500">Rp {{.DayExpense | rupiah}}</span></div>
+                    <div>Bulan ini: <span class="font-semibold text-rose-500">Rp {{.MonthExpense | rupiah}}</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Row 2: Grafik & Analisis -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- Grafik Arus Kas Bulanan (Menggunakan Table Representasi Data Bulanan) -->
+            <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 lg:col-span-8">
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h4 class="text-base font-bold text-slate-900">Analisa Bulanan</h4>
+                        <p class="text-xs text-slate-400 mt-0.5">Statistik rangkuman pendapatan dibanding pengeluaran.</p>
+                    </div>
+                </div>
+
+                <!-- Table Representasi Laporan Bulanan (Ganti Grafik Jika Tidak Pakai ChartJS) -->
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-sm">
+                        <thead>
+                            <tr class="border-b border-slate-100 text-slate-400 font-semibold text-xs uppercase tracking-wider">
+                                <th class="pb-3">Bulan / Tahun</th>
+                                <th class="pb-3 text-right">Pemasukan</th>
+                                <th class="pb-3 text-right">Pengeluaran</th>
+                                <th class="pb-3 text-right">Bersih (Net)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-50">
+                            {{range .MonthlyReports}}
+                            <tr class="hover:bg-slate-50/80 transition-colors">
+                                <td class="py-3.5 font-medium text-slate-900">{{.MonthName}} {{.Year}}</td>
+                                <td class="py-3.5 text-right text-emerald-600 font-semibold">Rp {{.Income | rupiah}}</td>
+                                <td class="py-3.5 text-right text-rose-500 font-semibold">Rp {{.Expense | rupiah}}</td>
+                                <td class="py-3.5 text-right font-bold {{if lt .Net 0}}text-rose-600{{else}}text-blue-600{{end}}">
+                                    Rp {{.Net | rupiah}}
+                                </td>
+                            </tr>
+                            {{else}}
+                            <tr>
+                                <td colspan="4" class="py-6 text-center text-slate-400 text-xs">Belum ada data bulanan yang tercatat.</td>
+                            </tr>
+                            {{end}}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Panel Aksi Cepat / Shortcut Informasi -->
+            <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 lg:col-span-4 flex flex-col justify-between">
+                <div>
+                    <h4 class="text-base font-bold text-slate-900 mb-4">Aksi Cepat</h4>
+                    <div class="space-y-3">
+                        <a href="/dashboard/transaction/add" class="flex items-center gap-3 p-3.5 rounded-2xl bg-slate-50 hover:bg-blue-50/50 group transition-all border border-transparent hover:border-blue-100">
+                            <span class="bg-blue-100 text-blue-600 p-2 rounded-xl text-sm group-hover:bg-blue-600 group-hover:text-white transition-colors">💰</span>
+                            <div>
+                                <h5 class="text-sm font-bold text-slate-800">Tambah Pemasukan</h5>
+                                <p class="text-xs text-slate-400 mt-0.5">Catat gaji, bonus, atau profit bisnis.</p>
+                            </div>
+                        </a>
+                        <a href="/dashboard/transaction/add" class="flex items-center gap-3 p-3.5 rounded-2xl bg-slate-50 hover:bg-rose-50/50 group transition-all border border-transparent hover:border-rose-100">
+                            <span class="bg-rose-100 text-rose-500 p-2 rounded-xl text-sm group-hover:bg-rose-600 group-hover:text-white transition-colors">💸</span>
+                            <div>
+                                <h5 class="text-sm font-bold text-slate-800">Tambah Pengeluaran</h5>
+                                <p class="text-xs text-slate-400 mt-0.5">Catat belanja harian, utilitas, atau tagihan.</p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="mt-6 bg-blue-50/40 p-4 rounded-2xl border border-blue-50/80">
+                    <p class="text-xs text-blue-800 font-medium leading-relaxed">
+                        💡 <strong>Tips Finansial:</strong> Jaga rasio pengeluaran Anda agar tidak melebihi 30% dari total pemasukan bulanan demi kesehatan tabungan jangka panjang.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-100 py-6 mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-xs text-slate-400">
+            <p>&copy; 2026 Dompet Mandiri Ledger System. Hak Cipta Dilindungi.</p>
+        </div>
+    </footer>
+
 </body>
 </html>

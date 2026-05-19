@@ -2,18 +2,148 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Home - Finance App</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dompet Mandiri - Kelola Keuangan Praktis</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+    </style>
 </head>
-<body>
-    <div class="container text-center mt-5 pt-5">
-        <h1>Selamat Datang di Finance App</h1>
-        <p class="lead">Kelola laporan keuangan Anda dengan mudah dan aman.</p>
-        <div class="mt-4">
-            <a href="/login" class="btn btn-primary mx-2">Login</a>
-            <a href="/register" class="btn btn-outline-primary mx-2">Daftar</a>
+<body class="bg-slate-50 text-slate-800 antialiased selection:bg-blue-500 selection:text-white">
+
+    <!-- Header / Navbar -->
+    <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <!-- Logo -->
+            <div class="flex items-center gap-2">
+                <div class="bg-blue-600 p-2 rounded-xl text-white shadow-md shadow-blue-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <span class="text-xl font-bold tracking-tight bg-gradient-to-r blue bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">DompetMandiri</span>
+            </div>
         </div>
-    </div>
+    </header>
+
+    <!-- Hero Section -->
+    <main class="relative overflow-hidden pt-12 pb-20 lg:pt-20 lg:pb-28">
+        <!-- Background Decorative Elements -->
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-96 opacity-30 pointer-events-none">
+            <div class="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-blue-400 rounded-full filter blur-[120px]"></div>
+            <div class="absolute bottom-[10%] right-[-10%] w-[400px] h-[400px] bg-indigo-300 rounded-full filter blur-[100px]"></div>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="lg:grid lg:grid-cols-12 lg:gap-12 items-center">
+                
+                <!-- Hero Text -->
+                <div class="sm:text-center md:max-w-2xl md:mx-auto lg:col-span-6 lg:text-left">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-600 mb-6">
+                        <span class="flex h-2 w-2 relative">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                        </span>
+                        Aplikasi Pencatat Keuangan Pribadi & Keluarga
+                    </span>
+                    <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 leading-tight">
+                        Kendali Penuh <br class="hidden sm:block">
+                        <span class="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Arus Kas Anda</span>
+                        Ada di Sini.
+                    </h1>
+                    <p class="mt-4 text-base sm:text-xl text-slate-500 leading-relaxed">
+                        Jangan biarkan uang Anda menguap begitu saja. Catat pendapatan, pantau pengeluaran harian, dan analisa kesehatan finansial Anda lewat grafik interaktif yang mudah dipahami.
+                    </p>
+                    
+                    <!-- CTAs -->
+                    <div class="mt-10 sm:flex sm:justify-center lg:justify-start gap-4">
+                        <a href="/register" class="flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-bold px-8 py-4 rounded-2xl shadow-lg shadow-blue-200 hover:shadow-xl transition-all mb-4 sm:mb-0 text-base">
+                            Mulai Catat Gratis
+                        </a>
+                        <a href="/login" class="flex items-center justify-center bg-white border border-slate-200 hover:border-slate-300 text-slate-700 font-semibold px-8 py-4 rounded-2xl shadow-sm hover:shadow transition-all text-base">
+                            Buka Dashboard
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Hero Visual / Feature Card Preview -->
+                <div class="mt-16 sm:mt-24 lg:mt-0 lg:col-span-6">
+                    <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-xl shadow-slate-200/50 border border-slate-100 relative">
+                        <div class="absolute -top-4 -right-4 bg-indigo-600 text-white p-3 rounded-2xl shadow-lg rotate-12 hidden sm:block">
+                            <span class="text-xs font-bold">100% Aman</span>
+                        </div>
+                        
+                        <!-- Mini Dashboard Mockup -->
+                        <div class="flex justify-between items-center border-b border-slate-100 pb-4 mb-6">
+                            <div>
+                                <p class="text-xs text-slate-400 font-medium">Total Saldo Simpanan</p>
+                                <h3 class="text-2xl font-bold text-slate-900 mt-0.5">Rp 14.250.000</h3>
+                            </div>
+                            <span class="px-2.5 py-1 rounded-lg text-xs font-medium bg-emerald-50 text-emerald-600 flex items-center gap-1">
+                                📈 +12.4% bln ini
+                            </span>
+                        </div>
+
+                        <!-- Fake Graph Bar -->
+                        <div class="space-y-3">
+                            <div>
+                                <div class="flex justify-between text-xs font-semibold mb-1 text-slate-600">
+                                    <span>Pemasukan Bulanan</span>
+                                    <span class="text-blue-600">Rp 20.000.000</span>
+                                </div>
+                                <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                                    <div class="bg-blue-600 h-full rounded-full" style="width: 75%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-xs font-semibold mb-1 text-slate-600">
+                                    <span>Pengeluaran (Batas Kuota)</span>
+                                    <span class="text-rose-500">Rp 5.750.000</span>
+                                </div>
+                                <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                                    <div class="bg-rose-500 h-full rounded-full" style="width: 28%"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Feature Badges -->
+                        <div class="grid grid-cols-2 gap-4 mt-8 pt-6 border-t border-slate-100">
+                            <div class="flex items-start gap-3">
+                                <div class="bg-blue-50 text-blue-600 p-2 rounded-xl text-lg">📊</div>
+                                <div>
+                                    <h4 class="text-sm font-bold text-slate-900">Grafik Chart.js</h4>
+                                    <p class="text-xs text-slate-400 mt-0.5">Visualisasi arus kas otomatis.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <div class="bg-indigo-50 text-indigo-600 p-2 rounded-xl text-lg">⚡</div>
+                                <div>
+                                    <h4 class="text-sm font-bold text-slate-900">Performa Kilat</h4>
+                                    <p class="text-xs text-slate-400 mt-0.5">Didukung Go & PostgreSQL.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-100 py-8 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm text-slate-400">
+            <p>&copy; 2026 Dompet Mandiri Ledger System. Hak Cipta Dilindungi.</p>
+        </div>
+    </footer>
+
 </body>
 </html>

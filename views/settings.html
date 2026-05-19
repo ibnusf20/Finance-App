@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pengaturan Profil - Dompet Mandiri</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col selection:bg-blue-500 selection:text-white">
+
+    <!-- Top Navigation Bar -->
+    <nav class="bg-white border-b border-slate-100 sticky top-0 z-40 shadow-sm shadow-slate-100/50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <!-- Brand Logo -->
+                <div class="flex items-center gap-2">
+                    <a href="/dashboard" class="bg-blue-600 p-2 rounded-xl text-white block">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </a>
+                    <span class="text-lg font-bold tracking-tight bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">DompetMandiri</span>
+                </div>
+
+                <!-- Right Actions -->
+                <div class="flex items-center gap-4">
+                    <a href="/dashboard" class="text-xs sm:text-sm font-semibold text-slate-600 hover:text-blue-600 px-3 py-2 transition-colors">
+                        ← Kembali ke Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Container -->
+    <main class="flex-1 max-w-4xl w-full mx-auto px-4 py-10">
+        
+        <!-- Header Page Title -->
+        <div class="mb-8">
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">⚙️ Pengaturan Profil</h1>
+            <p class="text-slate-500 text-sm mt-1">Kelola informasi akun Anda dan perbarui kata sandi untuk keamanan berkala.</p>
+        </div>
+
+        <!-- Layout Grid: Sidebar info & Form Utama -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            
+            <!-- Left Side: Mini Info Card -->
+            <div class="lg:col-span-4 bg-white rounded-3xl p-6 shadow-sm border border-slate-100 text-center">
+                <!-- PERBAIKAN: Menggunakan class 'uppercase' bawaan Tailwind, menghilangkan filter '| upper' -->
+                <div class="w-20 h-20 bg-gradient-to-tr from-blue-500 to-indigo-600 text-white rounded-2xl flex items-center justify-center text-3xl font-bold mx-auto shadow-md shadow-blue-100 uppercase">
+                    {{if .Username}}{{slice .Username 0 1}}{{else}}U{{end}}
+                </div>
+                <h3 class="text-lg font-bold text-slate-900 mt-4">{{if .Username}}{{.Username}}{{else}}User{{end}}</h3>
+                <p class="text-xs text-slate-400 mt-0.5">{{if .Email}}{{.Email}}{{else}}user@dompetmandiri.local{{end}}</p>
+                
+                <div class="mt-6 pt-6 border-t border-slate-100 text-left space-y-3">
+                    <div class="flex justify-between text-xs">
+                        <span class="text-slate-400">Status Akun</span>
+                        <span class="font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">Aktif</span>
+                    </div>
+                    <div class="flex justify-between text-xs">
+                        <span class="text-slate-400">Tipe Anggota</span>
+                        <span class="font-semibold text-slate-600">Personal Ledger</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Side: Form Update Profil / Password -->
+            <div class="lg:col-span-8 space-y-6">
+                
+                <!-- Notifikasi Flash Message (Sukses/Gagal) -->
+                {{if .success}}
+                <div class="bg-emerald-50 border border-emerald-100 text-emerald-700 px-4 py-3 rounded-2xl text-sm flex items-center gap-2 font-medium">
+                    <span>✨</span> {{.success}}
+                </div>
+                {{end}}
+                {{if .error}}
+                <div class="bg-rose-50 border border-rose-100 text-rose-600 px-4 py-3 rounded-2xl text-sm flex items-center gap-2 font-medium">
+                    <span>⚠️</span> {{.error}}
+                </div>
+                {{end}}
+
+                <!-- Card Box: Form Perubahan Data -->
+                <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-100">
+                    <h4 class="text-base font-bold text-slate-900 mb-5 pb-3 border-b border-slate-50">Perbarui Kata Sandi</h4>
+                    
+                    <form action="/dashboard/settings" method="POST" class="space-y-5">
+                        
+                        <!-- Input Username (Readonly / Disabled Style) -->
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Nama Pengguna (Username)</label>
+                            <input type="text" value="{{.Username}}" disabled
+                                class="block w-full rounded-2xl border border-slate-200 px-4 py-3.5 bg-slate-50 text-slate-400 text-sm font-medium cursor-not-allowed">
+                            <p class="text-[11px] text-slate-400 mt-1">Username tidak dapat diubah untuk kebutuhan validasi ledger database.</p>
+                        </div>
+
+                        <!-- Input Password Lama -->
+                        <div>
+                            <label for="old_password" class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Kata Sandi Saat Ini</label>
+                            <input type="password" name="old_password" id="old_password" required placeholder="••••••••"
+                                class="block w-full rounded-2xl border border-slate-200 px-4 py-3.5 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-sm text-slate-800 bg-slate-50/50 focus:bg-white transition-all">
+                        </div>
+
+                        <!-- Input Password Baru -->
+                        <div>
+                            <label for="new_password" class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Kata Sandi Baru</label>
+                            <input type="password" name="new_password" id="new_password" required placeholder="Min. 6 karakter"
+                                class="block w-full rounded-2xl border border-slate-200 px-4 py-3.5 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-sm text-slate-800 bg-slate-50/50 focus:bg-white transition-all">
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="pt-3 flex justify-end">
+                            <button type="submit"
+                                class="w-full sm:w-auto inline-flex justify-center items-center px-6 py-3.5 border border-transparent rounded-2xl shadow-md shadow-blue-100 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all transform active:scale-[0.98]">
+                                Simpan Perubahan
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-100 py-6 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-xs text-slate-400">
+            <p>&copy; 2026 Dompet Mandiri Ledger System. Hak Cipta Dilindungi.</p>
+        </div>
+    </footer>
+
+</body>
+</html>
