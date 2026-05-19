@@ -1,7 +1,7 @@
-# Finance-App
+# Dompet-Mandiri
 # 💰 Simple Personal Finance App
 
-<img width="1365" height="606" alt="image" src="https://github.com/user-attachments/assets/41811054-9cc0-45ba-83c0-99fa55d57d56" />
+<img width="1363" height="603" alt="image" src="https://github.com/user-attachments/assets/586402a1-9d0d-4ce5-8ebe-d8bd14777d3e" />
 
 
 Aplikasi web manajemen keuangan personal berbasis **Go (Golang)** yang dirancang untuk mencatat pemasukan dan pengeluaran secara mandiri. Aplikasi ini dilengkapi dengan visualisasi tren arus kas bulanan menggunakan grafik garis interaktif, serta ringkasan statistik harian dan bulanan.
