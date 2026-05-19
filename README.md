@@ -1,5 +1,5 @@
 # Dompet-Mandiri
-# 💰 Simple Personal Finance App
+# 💰 Simple Personal Dompet Mandiri
 
 <img width="1345" height="601" alt="image" src="https://github.com/user-attachments/assets/dbbf1f13-7111-4459-89e3-ec7027b93a2d" />
 
